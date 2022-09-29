@@ -15,3 +15,6 @@ seguindo [tutorial](https://www.freecodecamp.org/news/how-to-build-a-todo-applic
       measurementId: ".......",
     };
 
+# material-ui/core é versão antiga, não instala com react18
+ - usar React v16.13.1 como o tutorial diz ou
+ - npm install @material-ui/core --legacy-peer-deps
