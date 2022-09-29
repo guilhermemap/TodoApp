@@ -126,8 +126,8 @@ exports.uploadProfilePhoto = (request, response) => {
   let imageToBeUploaded = {};
 
   busboy.on("file", (name, file, info) => {
-    const { filename, encoding, mimetype2 } = info;
-    const mimetype = "image/png";
+    const { filename, encoding, mimeType } = info;
+    const mimetype = mimeType;
     if (mimetype !== "image/png" && mimetype !== "image/jpeg") {
       return response
         .status(400)
