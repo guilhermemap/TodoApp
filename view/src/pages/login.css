@@ -1,0 +1,29 @@
+.paper {
+    margin-top: 8px;
+    display: 'flex';
+    flex-direction: 'column';
+    align-items: 'center';
+}
+
+.avatar {
+    margin: 1px;
+}
+
+.form {
+    width: '100%';
+    margin-top: 1px;
+}
+
+.submit {
+    margin: 2px 0px 2px;
+}
+
+.customError {
+    color: 'red';
+    font-size: '0.8rem';
+    margin-top: 10;
+}
+
+.progess {
+    position: 'absolute';
+}

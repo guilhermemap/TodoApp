@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -7,165 +7,136 @@ import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
-import {styled} from '@mui/system';
 import Container from '@mui/material/Container';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import axios from 'axios';
 
-import { useNavigate } from  'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-const styles = (theme) => ({
-	paper: {
-		marginTop: theme.spacing(8),
-		display: 'flex',
-		flexDirection: 'column',
-		alignItems: 'center'
-	},
-	avatar: {
-		margin: theme.spacing(1),
-		backgroundColor: theme.palette.secondary.main
-	},
-	form: {
-		width: '100%',
-		marginTop: theme.spacing(1)
-	},
-	submit: {
-		margin: theme.spacing(3, 0, 2)
-	},
-	customError: {
-		color: 'red',
-		fontSize: '0.8rem',
-		marginTop: 10
-	},
-	progess: {
-		position: 'absolute'
-	}
-});
+import './login.css';
 
-class Login extends Component {
-	constructor(props) {
-		super(props);
+const Login = (props) => {
+    //console.log(props);
+    const navigate = useNavigate();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [errrors, setErrrors] = useState([]);
+    const [loading, setLoading] = useState(false);
 
-		this.state = {
-			email: '',
-			password: '',
-			errors: [],
-			loading: false
-		};
-	}
+    /* TODO: como pegar erros?
+        useEffect(() => {
+            if (props.UI.errors) {
+                setErrrors(props.UI.errors);
+            }
+        }, [props.UI.errors])
+    */
+    const handleChange = (event) => { // TODO: como melhorar isso?
+        if (event.target.name === 'email') {
+            setEmail(event.target.value);
+        }
+        if (event.target.name === 'password') {
+            setPassword(event.target.value);
+        }
+        if (event.target.name === 'errrors') {
+            setErrrors(event.target.value);
+        }
+        if (event.target.name === 'loading') {
+            setLoading(event.target.value);
+        }
+    };
 
-	componentWillReceiveProps(nextProps) {
-		if (nextProps.UI.errors) {
-			this.setState({
-				errors: nextProps.UI.errors
-			});
-		}
-	}
+    const handleSubmit = (event) => {
 
-	handleChange = (event) => {
-		this.setState({
-			[event.target.name]: event.target.value
-		});
-	};
+        event.preventDefault();
+        setLoading(true);
+        const userData = {
+            email: email,
+            password: password
+        };
+        axios
+            .post('/login', userData)
+            .then((response) => {
+                localStorage.setItem('AuthToken', `Bearer ${response.data.token}`);
+                setLoading(false);
+                //history.push('/');
+                //this.props.history.push('/');
+                navigate('/');
+            })
+            .catch((error) => {
+                setLoading(false);
+                setErrrors(error.response.data);
+            });
+    };
 
-	handleSubmit = (event) => {
-        let history = useNavigate();
-		event.preventDefault();
-		this.setState({ loading: true });
-		const userData = {
-			email: this.state.email,
-			password: this.state.password
-		};
-		axios
-			.post('/login', userData)
-			.then((response) => {
-				localStorage.setItem('AuthToken', `Bearer ${response.data.token}`);
-				this.setState({ 
-					loading: false,
-				});
-                history.push('/');		
-				//this.props.history.push('/');
-			})
-			.catch((error) => {				
-				this.setState({
-					errors: error.response.data,
-					loading: false
-				});
-			});
-	};
+    return (
+        <Container component="main" maxWidth="xs">
+            <CssBaseline />
+            <div className="paper">
+                <Avatar className="avatar">
+                    <LockOutlinedIcon />
+                </Avatar>
+                <Typography component="h1" variant="h5">
+                    Login
+                </Typography>
+                <form className="form" noValidate>
+                    <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="email"
+                        label="Email Address"
+                        name="email"
+                        autoComplete="email"
+                        autoFocus
+                        helperText={errrors.email}
+                        error={errrors.email ? true : false}
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        name="password"
+                        label="Password"
+                        type="password"
+                        id="password"
+                        autoComplete="current-password"
+                        helperText={errrors.password}
+                        error={errrors.password ? true : false}
+                        onChange={handleChange}
+                    />
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        className="submit}"
+                        onClick={handleSubmit}
+                        disabled={loading || !email || !password}
+                    >
+                        Sign In
+                        {loading && <CircularProgress size={30} className="progess" />}
+                    </Button>
+                    <Grid container>
+                        <Grid item>
+                            <Link href="signup" variant="body2">
+                                {"Don't have an account? Sign Up"}
+                            </Link>
+                        </Grid>
+                    </Grid>
+                    {errrors.general && (
+                        <Typography variant="body2" className="customError">
+                            {errrors.general}
+                        </Typography>
+                    )}
+                </form>
+            </div>
+        </Container>
+    );
 
-	render() {
-		const { classes } = this.props;
-		const { errors, loading } = this.state;
-		return (
-			<Container component="main" maxWidth="xs">
-				<CssBaseline />
-				<div className={classes.paper}>
-					<Avatar className={classes.avatar}>
-						<LockOutlinedIcon />
-					</Avatar>
-					<Typography component="h1" variant="h5">
-						Login
-					</Typography>
-					<form className={classes.form} noValidate>
-						<TextField
-							variant="outlined"
-							margin="normal"
-							required
-							fullWidth
-							id="email"
-							label="Email Address"
-							name="email"
-							autoComplete="email"
-							autoFocus
-							helperText={errors.email}
-							error={errors.email ? true : false}
-							onChange={this.handleChange}
-						/>
-						<TextField
-							variant="outlined"
-							margin="normal"
-							required
-							fullWidth
-							name="password"
-							label="Password"
-							type="password"
-							id="password"
-							autoComplete="current-password"
-							helperText={errors.password}
-							error={errors.password ? true : false}
-							onChange={this.handleChange}
-						/>
-						<Button
-							type="submit"
-							fullWidth
-							variant="contained"
-							color="primary"
-							className={classes.submit}
-							onClick={this.handleSubmit}
-							disabled={loading || !this.state.email || !this.state.password}
-						>
-							Sign In
-							{loading && <CircularProgress size={30} className={classes.progess} />}
-						</Button>
-						<Grid container>
-							<Grid item>
-								<Link href="signup" variant="body2">
-									{"Don't have an account? Sign Up"}
-								</Link>
-							</Grid>
-						</Grid>
-						{errors.general && (
-							<Typography variant="body2" className={classes.customError}>
-								{errors.general}
-							</Typography>
-						)}
-					</form>
-				</div>
-			</Container>
-		);
-	}
 }
 
 export default Login;
